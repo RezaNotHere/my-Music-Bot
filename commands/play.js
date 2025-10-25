@@ -1,5 +1,6 @@
 // commands/play.js
 const { SlashCommandBuilder } = require('discord.js');
+const { createErrorEmbed } = require('../music-player.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,7 +12,6 @@ module.exports = {
                 .setRequired(true)),
     
     async execute(interaction) {
-        // این فایل را در مرحله بعد خواهیم ساخت
         const { play } = require('../music-player.js');
         
         // 1. اول پاسخ را به تعویق می‌اندازیم

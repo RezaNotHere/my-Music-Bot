@@ -1,9 +1,30 @@
 // index.js
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, GatewayIntentBits, Events } = require('discord.js');
+const play = require('play-dl')
+const { Client, Collection, GatewayIntentBits, Events, ActivityType } = require('discord.js');
 require('dotenv').config();
 
+
+// ⭐️ ۲. تنظیم کردن play-dl برای استفاده از کوکی‌ها
+// ⭐️⭐️⭐️ بلوک صحیح (مربوط به ساندکلود) ⭐️⭐️⭐️
+
+
+        (async () => {
+            try {
+                // فقط تنظیم کردن ساندکلود
+                await play.setToken({
+                    soundcloud: {
+                        client_id: process.env.SOUNDCLOUD_CLIENT_ID
+                    }
+                });
+                console.log('✅ play-dl (SoundCloud) با Client ID احراز هویت شد.');
+
+            } catch (e) {
+                console.error(`❌ خطا در احراز هویت play-dl با SoundCloud: ${e.message}`);
+            }
+        })();
+        
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -28,6 +49,12 @@ for (const file of commandFiles) {
 // رویداد ready
 client.once(Events.ClientReady, readyClient => {
     console.log(`✅ Ready! Logged in as ${readyClient.user.tag}`);
+    //readyClient.user.setActivity('موسیقی', { type: ActivityType.Listening });
+    console.log('💡Make By Reza')
+    const statusText = "یــــوســــــف پیامــــبر";
+    readyClient.user.setActivity(statusText, {
+        type: ActivityType.Watching
+    });
 });
 
 // ⭐️ وارد کردن توابع کمکی امبد
@@ -72,15 +99,14 @@ client.on(Events.VoiceStateUpdate, (oldState, newState) => {
     if (queue && oldState.channelId === queue.voiceChannel.id) {
         const channel = oldState.guild.channels.cache.get(queue.voiceChannel.id);
         if (channel) {
-            const humanMembers = channel.members.filter(m => !m.user.bot);
-            
-            if (humanMembers.size === 0) {
-                // ⭐️ استفاده از امبد برای خروج
-                const leaveEmbed = createInfoEmbed('👋 کانال خالی شد. منم می‌رم. خداحافظ!');
-                queue.textChannel.send({ embeds: [leaveEmbed] });
-                if (queue.connection) queue.connection.disconnect();
+            const members = channel.members.filter(member => !member.user.bot);
+            if (members.size === 0) {
+                queue.player.stop();
                 serverQueues.delete(oldState.guild.id);
-            }
+                console.log(`Queue for ${oldState.guild.name} cleared as all members left the voice channel.`);
+            }            
+
+            
         }
     }
 });
